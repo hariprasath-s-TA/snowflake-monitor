@@ -1,0 +1,160 @@
+{
+    "monitoring_type": [
+        {
+            "key": "T1",
+            "value": "Login Behaviour",
+            "category": [
+                {
+                    "key": "C1",
+                    "value": "Logged over weekend",
+                    "user_input": false,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Logged Once",
+                            "user_input": false,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Disable User and Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC2",
+                            "value": "Logged More than this times",
+                            "user_input": true,
+                            "input_type": "time",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Disable User and Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "C2",
+                    "value": "Logged Between X Hrs and Y Hrs",
+                    "user_input": true,
+                    "input_type": "start/end time",
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Logged Once",
+                            "user_input": false,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Disable_User:Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC2",
+                            "value": "Logged More than this times",
+                            "user_input": true,
+                            "input_type": "time",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Disable_User:Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "T2",
+            "value": "Warehouse Usage",
+            "category": [
+                {
+                    "key": "C1",
+                    "value": "Credit Consumption MTD",
+                    "user_input": true,
+                    "input_type": "warehouse",
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Consumed More than this Credits",
+                            "user_input": true,
+                            "input_type": "credits",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Suspend_Warehouse:Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC2",
+                            "value": "Consumed More than this% Credits",
+                            "user_input": true,
+                            "input_type": "credits/percentage",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Suspend_Warehouse:Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
