@@ -22,7 +22,7 @@ sub_categories = ['Select SubCategory']
 actions = ['Select Action']
 monitors = ['Select Monitor']
 
-# Session Variables
+# Session variables init
 if 'no_actions' not in st.session_state:
 	st.session_state['no_actions'] = 1
 if 'data_dict' not in st.session_state:
@@ -93,7 +93,8 @@ if categories_input_type == 'start/end time':
     if date2 and time2:
         end_timestamp = f"'{date2} {time2}'" 
 elif categories_input_type == 'warehouse':
-    warehouse = st.text_input("Enter Warehouse Name",value=None)
+    warehouse_data = st.session_state['session'].sql("""SELECT DISTINCT WAREHOUSE_NAME AS WAREHOUSES FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY""").to_pandas()
+    warehouse = st.selectbox("Warehouse", warehouse_data['WAREHOUSES'].to_list(), index=None, key='warehouseSelector')
 
 time, credits, percentage, email = '', '', '', ''
 st.session_state['data_dict'][categorySelector] = []
@@ -258,4 +259,6 @@ if Button:
     for index, row in st.session_state['df'].iterrows():
         coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, start_timestamp, end_timestamp, row['Credits'], warehouse, row['Percentage'], row['Time'], 'Hari', row['Frequency'], row['Action_Value'], st.session_state['session'].sql('select current_timestamp() as TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
     st.write('Updated')
+    st.session_state['reset'] = True
+    st.rerun()
     
