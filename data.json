@@ -24,7 +24,7 @@
                                 },
                                 {
                                     "key": "A2",
-                                    "value": "Disable User and Notify",
+                                    "value": "Disable_User:Notify",
                                     "user_input": true,
                                     "input_type": "username/email"
                                 }
@@ -44,7 +44,7 @@
                                 },
                                 {
                                     "key": "A2",
-                                    "value": "Disable User and Notify",
+                                    "value": "Disable_User:Notify",
                                     "user_input": true,
                                     "input_type": "username/email"
                                 }
