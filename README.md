@@ -1,2 +1,2 @@
 # snowflake-monitor
-Monitoring Warehouse, Queries, Syntax validator
+Monitoring Warehouse, Queries, Login behaviour within snowflake
