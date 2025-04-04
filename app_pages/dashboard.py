@@ -18,7 +18,7 @@ def active_rule(id, state, task):
             """).collect()
         
 def edit_rule(id):
-    pass
+    print('change')
 
 def delete_rule(id, task):
     st.session_state['session'].sql(f"""
