@@ -101,10 +101,11 @@ st.session_state['data_dict'][categorySelector] = []
 with stylable_container(key="containerStyle", css_styles=containerStyle):
     st.subheader('Add Upto 3 Actions')
     for i in range(0, st.session_state['no_actions']):
+        st.markdown(f'<h5>Action {str(i+1)}:</h1>', unsafe_allow_html=True)
         cols = st.columns(2)
         with cols[0]:
             subcategorySelector = st.selectbox(
-                "Sub Category" + str(i+1),
+                "Sub Category",
                 set(sub_categories),
                 index=None,
                 placeholder="Select subcategory",
@@ -173,6 +174,7 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
                     st.session_state['data_dict'][categorySelector].append({subcategorySelector: {"action": {"name": actionSelector, "value": email}, "frequency": frequency_data['FREQUENCY_VALUE'].to_list()[frequency_data['FREQUENCY_NAME'].to_list().index(frequency) - 1]}})
             except Exception as e:
                 print(e, "Select frequency")
+        st.divider()
 
     if None in st.session_state['data_dict'].keys():
         st.session_state['data_dict'].pop(None)
@@ -224,7 +226,8 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
     if st.session_state['reset']:
         st.session_state['df'] = pd.DataFrame()
         st.session_state['data_dict'] = dict()
-    st.dataframe(st.session_state['df'], hide_index=True, use_container_width=True)
+    if not st.session_state['df'].empty:
+        st.dataframe(st.session_state['df'], hide_index=True, use_container_width=True)
 
 def create_task(frequency, task_name, procedure):
     task = f"""
