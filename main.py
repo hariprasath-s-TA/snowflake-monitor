@@ -9,6 +9,8 @@ st.title("Snowflake Monitoring UI")
 if 'session' not in st.session_state:
     st.session_state['session'] = get_active_session()
 
+st.session_state['session'].sql("CALL AUTOMATE_DASHBOARD_VIEW()").collect()
+
 pg = st.navigation([
     st.Page("app_pages/dashboard.py", title="Dashboard", icon="🖥️"),
     st.Page("app_pages/addMonitors.py", title="Add Monitors", icon="➕")
