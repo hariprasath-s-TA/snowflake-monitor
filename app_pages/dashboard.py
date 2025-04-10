@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_extras.stylable_container import stylable_container
 
 
 st.header("Monitoring Rules")
@@ -31,6 +32,23 @@ def run_rule(task):
     st.session_state['session'].sql(f"""
         execute task task_{task}
         """).collect()
+
+containerStyle = ["""{
+    border: 1px solid #bdc4d5;
+    border-radius: 0.5rem;
+    padding: 8px;
+    overflow: hidden;
+}"""]
+
+results = st.session_state['session'].sql(f"""SELECT * FROM dashboard_stats_view""").to_pandas()
+
+for i in range(len(results)):
+    cols = st.columns(len(results.columns))
+    for j, column in enumerate(results.columns):
+        with cols[j]:
+            with stylable_container(key="containerStyle", css_styles=containerStyle):
+                st.markdown(f'<h3>{column}</h3>', unsafe_allow_html=True)
+                st.markdown(f'<h4>{str(results.iloc[i][column])}</h4>', unsafe_allow_html=True)
 
 data = st.session_state['session'].sql("""
     SELECT 
