@@ -249,10 +249,8 @@ def coreProc(monitorName, monitorType, category, subcategory, action, startTimes
     actionId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.ACTIONS_REGISTRY WHERE NAME = '{action}'""").to_pandas()['ID'].values[0])
     isActive = True
     taskName = monitorName
-    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUBCATEGORY = '{subcategory}'""").to_pandas()['ID'].values[0])
+    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUBCATEGORY_ID = '{subCategoryId}'""").to_pandas()['ID'].values[0])
     procedure = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE ID = '{procedureId}'""").to_pandas()['PROCEDURE_NAME'].values[0])
-    # params = str(session.sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE ID = '{procedureId}'""").to_pandas()['PARAMETERS'].values[0])
-
     insertQuery = f"""INSERT INTO SNOWFLAKE_MONITORING.PUBLIC.MONITOR_METADATA VALUES('{id}', '{monitorName}', '{monitorId}', '{categoryId}', '{subCategoryId}', '{actionId}', '{warehouseName}', '{credits}', '{percentage}', '{logTime}', '{startTimestamp}', '{endTimestamp}', '{frequency}', '{isActive}', '{taskName}', '{email_id}', '{createdBy}', '{createdAt}')"""
     st.session_state['session'].sql(insertQuery).collect()
     create_task(frequency, taskName, f"call {procedure}('{id}')")
