@@ -55,12 +55,30 @@ display_df = data[[
     'EMAIL_ID',
     'CREATED_BY']]
 
-event = st.dataframe(
-    display_df, 
-    selection_mode=["single-row"], 
-    on_select='rerun',
-    use_container_width=True,
-    hide_index=True,)
+text_search = st.text_input("Search Monitor name, type, category, subcategory, actions, warehouse name, email_id and created by", value="", placeholder="Type and press enter")
+search1 = display_df["MONITOR_NAME"].str.contains(text_search)
+search2 = display_df["MONITOR_TYPE"].str.contains(text_search)
+search3 = display_df["MONITOR_CATEGORY"].str.contains(text_search)
+search4 = display_df["MONITOR_SUBCATEGORY"].str.contains(text_search)
+search5 = display_df["MONITOR_ACTION"].str.contains(text_search)
+search6 = display_df["WAREHOUSE_NAME"].str.contains(text_search)
+search7 = display_df["EMAIL_ID"].str.contains(text_search)
+search8 = display_df["CREATED_BY"].str.contains(text_search)
+df_search = display_df[search1 | search2 | search3 | search4 | search5 | search6 | search7 | search8]
+if text_search:
+    event = st.dataframe(
+        df_search, 
+        selection_mode=["single-row"], 
+        on_select='rerun',
+        use_container_width=True,
+        hide_index=True,)
+else:
+    event = st.dataframe(
+        display_df, 
+        selection_mode=["single-row"], 
+        on_select='rerun',
+        use_container_width=True,
+        hide_index=True,)
 
 checked = event.selection.rows 
 # if len(event.selection.rows)>0 else [0]
