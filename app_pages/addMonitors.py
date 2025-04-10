@@ -257,8 +257,9 @@ def coreProc(monitorName, monitorType, category, subcategory, action, startTimes
 
 Button = st.button("Save and Monitor", disabled = st.session_state['df'].empty)
 if Button:
+    createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER()""").to_pandas().iloc[0, 0]
     for index, row in st.session_state['df'].iterrows():
-        coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, start_timestamp, end_timestamp, row['Credits'], warehouse, row['Percentage'], row['Time'], 'Hari', row['Frequency'], row['Action_Value'], st.session_state['session'].sql('select current_timestamp() as TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
+        coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, start_timestamp, end_timestamp, row['Credits'], warehouse, row['Percentage'], row['Time'], createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('select current_timestamp() as TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
     st.write('Updated')
     st.session_state['reset'] = True
     st.rerun()
