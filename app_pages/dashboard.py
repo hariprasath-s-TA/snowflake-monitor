@@ -48,7 +48,7 @@ for i in range(len(results)):
         with cols[j]:
             with stylable_container(key="containerStyle", css_styles=containerStyle):
                 st.markdown(f'<h3>{column}</h3>', unsafe_allow_html=True)
-                st.markdown(f'<h4>{str(results.iloc[i][column])}</h4>', unsafe_allow_html=True)
+                st.markdown(f'<h4>{results.iloc[i][column]}</h4>', unsafe_allow_html=True)
 
 data = st.session_state['session'].sql("""
     SELECT 
@@ -105,16 +105,16 @@ row = data.iloc[checked]
 try:
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.toggle('Active', value=row['IS_ACTIVE'].values[0], key=str(row['ID'].values[0]) + ':active', on_change=active_rule, args=(str(row['ID'].values[0]), str(row['IS_ACTIVE'].values[0]), str(row['TASK_NAME'].values[0]), ), disabled=False if checked else True)
+        st.toggle('Active', value=row['IS_ACTIVE'].values[0], key=row['ID'].values[0] + ':active', on_change=active_rule, args=(row['ID'].values[0], row['IS_ACTIVE'].values[0], row['TASK_NAME'].values[0], ), disabled=False if checked else True)
     with col2:
-        st.button('Edit', key=str(row['ID'].values[0]) + ':edit', on_click=edit_rule, args=(str(row['ID'].values[0]), ), disabled=False if checked else True)
+        st.button('Edit', key=row['ID'].values[0] + ':edit', on_click=edit_rule, args=(row['ID'].values[0], ), disabled=False if checked else True)
     with col3:
-        st.button('Delete', key=str(row['ID'].values[0]) + ':delete', on_click=delete_rule, args=(str(row['ID'].values[0]), str(row['TASK_NAME'].values[0]), ), disabled=False if checked else True)
+        st.button('Delete', key=row['ID'].values[0] + ':delete', on_click=delete_rule, args=(row['ID'].values[0], row['TASK_NAME'].values[0], ), disabled=False if checked else True)
     with col4:
-        st.button('Run', key=str(row['ID'].values[0]) + ':run', on_click=run_rule, args=(row['TASK_NAME'].values[0], ), disabled=False if checked else True)
+        st.button('Run', key=row['ID'].values[0] + ':run', on_click=run_rule, args=(row['TASK_NAME'].values[0], ), disabled=False if checked else True)
     with st.expander("See results"):
-        st.dataframe(st.session_state['session'].sql(f"""select * from result_table where id='{str(row['ID'].values[0])}'"""), hide_index=True, use_container_width=True)
-        if st.button(label='', icon=':material/refresh:', key=str(row['ID'].values[0]) + ':refresh', disabled=False if checked else True):
+        st.dataframe(st.session_state['session'].sql(f"""select * from result_table where id='{row['ID'].values[0]}'"""), hide_index=True, use_container_width=True)
+        if st.button(label='', icon=':material/refresh:', key=row['ID'].values[0] + ':refresh', disabled=False if checked else True):
             st.rerun()
 except IndexError:
     st.write('Select any rule from above to continue')
