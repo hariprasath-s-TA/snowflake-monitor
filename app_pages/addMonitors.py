@@ -6,7 +6,7 @@ import pandas as pd
 import uuid
 
 
-st.header("Add Monitoring Rule")
+st.header("Create Monitors")
 containerStyle = ["""{
     border: 2px solid #bdc4d5;
     border-radius: 0.2rem;
