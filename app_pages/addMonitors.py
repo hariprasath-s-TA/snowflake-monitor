@@ -99,9 +99,9 @@ elif categories_input_type == 'warehouse':
 time, credits, percentage, email = '', '', '', ''
 st.session_state['data_dict'][categorySelector] = []
 with stylable_container(key="containerStyle", css_styles=containerStyle):
-    st.subheader('Add Upto 3 Actions')
+    st.subheader('Add Upto 3 Rules')
     for i in range(0, st.session_state['no_actions']):
-        st.markdown(f'<h5>Action {str(i+1)}:</h1>', unsafe_allow_html=True)
+        st.markdown(f'<h5>Rule {str(i+1)}:</h1>', unsafe_allow_html=True)
         cols = st.columns(2)
         with cols[0]:
             subcategorySelector = st.selectbox(
