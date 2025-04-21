@@ -2,7 +2,7 @@
     "monitoring_type": [
         {
             "key": "T1",
-            "value": "Login Behaviour",
+            "value": "User Monitoring",
             "category": [
                 {
                     "key": "C1",
@@ -99,12 +99,76 @@
                             ]
                         }
                     ]
+                },
+                {
+                    "key": "C2",
+                    "value": "Inactive Users",
+                    "user_input": false,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Users not logged in for X days",
+                            "user_input": true,
+                            "input_type": "text",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                },
+                                {
+                                    "key": "A2",
+                                    "value": "Disable_User:Notify",
+                                    "user_input": true,
+                                    "input_type": "username/email"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "C3",
+                    "value": "Login tracking",
+                    "user_input": false,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Login failures within short period of time",
+                            "user_input": false,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC2",
+                            "value": "Rapid access attempts from diverse IP origins",
+                            "user_input": false,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
         {
             "key": "T2",
-            "value": "Warehouse Usage",
+            "value": "Warehouse Monitoring",
             "category": [
                 {
                     "key": "C1",
@@ -149,6 +213,134 @@
                                     "value": "Suspend_Warehouse:Notify",
                                     "user_input": true,
                                     "input_type": "username/email"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "T3",
+            "value": "Database Object Monitoring",
+            "category": [
+                {
+                    "key": "C1",
+                    "value": "Capture DDL operations on Schema",
+                    "user_input": true,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Create or Replace Operation",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC2",
+                            "value": "Drop Operation",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC3",
+                            "value": "Create or Replace or Drop Operation",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "C2",
+                    "value": "Capture DDL operations on Table",
+                    "user_input": true,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Delete or Truncate Operation",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC2",
+                            "value": "Drop Operation",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC3",
+                            "value": "Delete or Truncate or Drop Operation",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "C3",
+                    "value": "Observe Table Data",
+                    "user_input": true,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC1",
+                            "value": "Tables with zero quries over time",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
                                 }
                             ]
                         }

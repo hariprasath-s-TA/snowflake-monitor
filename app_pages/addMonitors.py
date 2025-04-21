@@ -17,10 +17,10 @@ containerStyle = ["""{
 with st.session_state['session'].file.get_stream('@"SNOWFLAKE_MONITORING"."PUBLIC"."SNOWFLAKE_MONITORING_APP_STAGE"/data.json') as file:
     data = json.load(file)
 
-categories = ['Select Category']
-sub_categories = ['Select SubCategory']
-actions = ['Select Action']
-monitors = ['Select Monitor']
+categories = []
+sub_categories = []
+actions = []
+monitors = []
 
 # Session variables init
 if 'no_actions' not in st.session_state:
