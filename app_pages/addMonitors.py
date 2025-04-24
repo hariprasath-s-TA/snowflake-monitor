@@ -6,7 +6,7 @@ import pandas as pd
 import uuid
 
 
-st.header("Create Monitors")
+st.markdown("<h2 style='text-align: center;'>Create Monitors</h2>", unsafe_allow_html=True)
 containerStyle = ["""{
     border: 2px solid #bdc4d5;
     border-radius: 0.2rem;
@@ -255,11 +255,26 @@ def coreProc(monitorName, monitorType, category, subcategory, action, startTimes
     st.session_state['session'].sql(insertQuery).collect()
     create_task(frequency, taskName, f"call {procedure}('{id}')")
 
+def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times):
+    params = {}
+    if warehouse_name:
+        resource_name = warehouse_name
+    else:
+        resource_name = "NULL"
+    params['credits_limit'] = credits_limit
+    params['start_time'] = start_time
+    params['end_time'] = end_time
+    params['percentage'] = percentage
+    params['log_times'] = log_times
+    return resource_name, params
+
 Button = st.button("Save and Monitor", disabled = st.session_state['df'].empty)
 if Button:
     createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER()""").to_pandas().iloc[0, 0]
     for index, row in st.session_state['df'].iterrows():
-        coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, start_timestamp, end_timestamp, row['Credits'], warehouse, row['Percentage'], row['Time'], createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('select current_timestamp() as TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
+        resource_name, params = getParams(warehouse, credits, start_timestamp, end_timestamp, percentage, time)
+        st.write(resource_name, params)
+        # coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, start_timestamp, end_timestamp, row['Credits'], warehouse, row['Percentage'], row['Time'], createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('select current_timestamp() as TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
     st.write('Updated')
     st.session_state['reset'] = True
     st.rerun()
