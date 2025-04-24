@@ -103,14 +103,14 @@
                 {
                     "key": "C2",
                     "value": "Inactive Users",
-                    "user_input": false,
-                    "input_type": null,
+                    "user_input": true,
+                    "input_type": "number",
                     "sub_category": [
                         {
                             "key": "SC1",
                             "value": "Users not logged in for X days",
-                            "user_input": true,
-                            "input_type": "text",
+                            "user_input": false,
+                            "input_type": null,
                             "action": [
                                 {
                                     "key": "A1",
@@ -131,8 +131,8 @@
                 {
                     "key": "C3",
                     "value": "Login tracking",
-                    "user_input": false,
-                    "input_type": null,
+                    "user_input": true,
+                    "input_type": "number",
                     "sub_category": [
                         {
                             "key": "SC1",

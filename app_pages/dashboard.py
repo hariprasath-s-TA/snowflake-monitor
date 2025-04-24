@@ -3,7 +3,7 @@ from streamlit_extras.stylable_container import stylable_container
 import streamlit as st
 
 
-st.header("Monitoring Rules")
+st.markdown("<h2 style='text-align: center;'>Monitoring Rules</h2>", unsafe_allow_html=True)
 
 def active_rule(id, state, task):
     st.session_state['session'].sql(f"""
