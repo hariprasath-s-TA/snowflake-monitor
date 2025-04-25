@@ -6,7 +6,7 @@ import pandas as pd
 import uuid
 
 
-st.markdown("<h2 style='text-align: center;'>Create Monitors</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: left;'>Create Monitors</h2>", unsafe_allow_html=True)
 containerStyle = ["""{
     border: 2px solid #bdc4d5;
     border-radius: 0.2rem;
@@ -76,6 +76,7 @@ start_timestamp = "NULL"
 end_timestamp = "NULL"
 warehouse = "NULL"
 
+warehouse_data = st.session_state['session'].sql("""SELECT DISTINCT WAREHOUSE_NAME AS WAREHOUSES FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY""").to_pandas()
 if categories_input_type == 'start/end time':
     col1,col2 = st.columns(2)
     with col1:
@@ -93,10 +94,14 @@ if categories_input_type == 'start/end time':
     if date2 and time2:
         end_timestamp = f"'{date2} {time2}'" 
 elif categories_input_type == 'warehouse':
-    warehouse_data = st.session_state['session'].sql("""SELECT DISTINCT WAREHOUSE_NAME AS WAREHOUSES FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY""").to_pandas()
-    warehouse = st.selectbox("Warehouse", warehouse_data['WAREHOUSES'].to_list(), index=None, key='warehouseSelector')
+    warehouse = st.selectbox(
+        "Warehouse", 
+        set(warehouse_data['WAREHOUSES'].to_list()), 
+        index=None, 
+        placeholder='Select Warehouse',
+        )
 
-time, credits, percentage, email = '', '', '', ''
+time, credits, percentage, email, days = 'NULL', 'NULL', 'NULL', 'NULL', 'NULL'
 st.session_state['data_dict'][categorySelector] = []
 with stylable_container(key="containerStyle", css_styles=containerStyle):
     st.subheader('Add Upto 3 Rules')
@@ -128,8 +133,8 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
         with cols[1]:
             if sub_categories_input_type == 'time':
                 time = st.number_input("Number of times",value = None, key="time"+str(i))
-            elif sub_categories_input_type == 'number':
-                credits = st.number_input("Credit Limit to be Checked",value=None,key="num"+str(i))
+            elif sub_categories_input_type == 'days':
+                days = st.number_input("No. of days",value=None,key="num"+str(i))
             elif sub_categories_input_type == 'credits/percentage':
                 credits = st.text_input("Enter Credit Limit",value=None,key="text"+str(i))
                 percentage = st.number_input("Percentage to be Checked",value=None,key="num1"+str(i))
@@ -241,7 +246,7 @@ def create_task(frequency, task_name, procedure):
     st.session_state['session'].sql(resume_task).collect()
 
 
-def coreProc(monitorName, monitorType, category, subcategory, action, startTimestamp, endTimestamp, credits, warehouseName, percentage, logTime, createdBy, frequency, email_id, createdAt):
+def coreProc(monitorName, monitorType, category, subcategory, action, resourceName, params, createdBy, frequency, email_id, createdAt):
     id = uuid.uuid1().hex
     monitorId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITOR_REGISTRY WHERE NAME = '{monitorType}'""").to_pandas()['ID'].values[0])
     categoryId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.CATEGORY_REGISTRY WHERE NAME = '{category}'""").to_pandas()['ID'].values[0])
@@ -249,33 +254,35 @@ def coreProc(monitorName, monitorType, category, subcategory, action, startTimes
     actionId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.ACTIONS_REGISTRY WHERE NAME = '{action}'""").to_pandas()['ID'].values[0])
     isActive = True
     taskName = monitorName
-    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUBCATEGORY_ID = '{subCategoryId}'""").to_pandas()['ID'].values[0])
+    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUB_CATEGORY_ID = '{subCategoryId}' AND CATEGORY_ID = '{categoryId}'""").to_pandas()['ID'].values[0])
     procedure = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE ID = '{procedureId}'""").to_pandas()['PROCEDURE_NAME'].values[0])
-    insertQuery = f"""INSERT INTO SNOWFLAKE_MONITORING.PUBLIC.MONITOR_METADATA VALUES('{id}', '{monitorName}', '{monitorId}', '{categoryId}', '{subCategoryId}', '{actionId}', '{warehouseName}', '{credits}', '{percentage}', '{logTime}', '{startTimestamp}', '{endTimestamp}', '{frequency}', '{isActive}', '{taskName}', '{email_id}', '{createdBy}', '{createdAt}')"""
+    insertQuery = f"""INSERT INTO SNOWFLAKE_MONITORING.PUBLIC.MONITOR_METADATA VALUES('{id}', '{monitorName}', '{monitorId}', '{categoryId}', '{subCategoryId}', '{actionId}', '{resourceName}', '{params}', '{frequency}', '{isActive}', '{taskName}', '{email_id}', '{createdBy}', '{createdAt}')"""
     st.session_state['session'].sql(insertQuery).collect()
     create_task(frequency, taskName, f"call {procedure}('{id}')")
 
-def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times):
+def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times, days):
     params = {}
     if warehouse_name:
         resource_name = warehouse_name
     else:
         resource_name = "NULL"
-    params['credits_limit'] = credits_limit
-    params['start_time'] = start_time
-    params['end_time'] = end_time
-    params['percentage'] = percentage
-    params['log_times'] = log_times
+    params["credits_limit"] = credits_limit
+    params["start_time"] = start_time
+    params["end_time"] = end_time
+    params["percentage"] = percentage
+    params["log_times"] = log_times
+    params["days"] = days
     return resource_name, params
 
 Button = st.button("Save and Monitor", disabled = st.session_state['df'].empty)
 if Button:
-    createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER()""").to_pandas().iloc[0, 0]
-    for index, row in st.session_state['df'].iterrows():
-        resource_name, params = getParams(warehouse, credits, start_timestamp, end_timestamp, percentage, time)
-        st.write(resource_name, params)
-        # coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, start_timestamp, end_timestamp, row['Credits'], warehouse, row['Percentage'], row['Time'], createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('select current_timestamp() as TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
-    st.write('Updated')
-    st.session_state['reset'] = True
-    st.rerun()
+    try:
+        createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER() as USER""").to_pandas()['USER'][0]
+        for index, row in st.session_state['df'].iterrows():
+            resource_name, params = getParams(warehouse, credits, start_timestamp, end_timestamp, percentage, time, days)
+            coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, resource_name, str(params).replace("'", '"'), createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
+        st.session_state['reset'] = True
+        st.rerun()
+    except Exception as e:
+        st.write(e)
     
