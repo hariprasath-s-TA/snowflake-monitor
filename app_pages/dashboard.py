@@ -3,7 +3,7 @@ from streamlit_extras.stylable_container import stylable_container
 import streamlit as st
 
 
-st.markdown("<h2 style='text-align: center;'>Monitoring Rules</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='text-align: left;'>Monitoring Rules</h2>", unsafe_allow_html=True)
 
 def active_rule(id, state, task):
     st.session_state['session'].sql(f"""
@@ -63,24 +63,20 @@ display_df = data[[
     'MONITOR_CATEGORY', 
     'MONITOR_SUBCATEGORY', 
     'MONITOR_ACTION', 
-    'WAREHOUSE_NAME',
-    'CREDIT_LIMIT', 
-    'PERCENTAGE',
-    'LOG_TIMES',
-    'START_TIME',
-    'END_TIME',
+    'RESOURCE_NAME',
+    'PARAMS',
     'FREQUENCY_NAME',
     'TASK_NAME',
     'EMAIL_ID',
     'CREATED_BY']]
 
-text_search = st.text_input("Search Monitor name, type, category, subcategory, actions, warehouse name, email_id and created by", value="", placeholder="Type and press enter")
+text_search = st.text_input("Search Monitor name, type, category, subcategory, actions, resource name, email_id and created by", value="", placeholder="Type and press enter")
 search1 = display_df["MONITOR_NAME"].str.contains(text_search)
 search2 = display_df["MONITOR_TYPE"].str.contains(text_search)
 search3 = display_df["MONITOR_CATEGORY"].str.contains(text_search)
 search4 = display_df["MONITOR_SUBCATEGORY"].str.contains(text_search)
 search5 = display_df["MONITOR_ACTION"].str.contains(text_search)
-search6 = display_df["WAREHOUSE_NAME"].str.contains(text_search)
+search6 = display_df["RESOURCE_NAME"].str.contains(text_search)
 search7 = display_df["EMAIL_ID"].str.contains(text_search)
 search8 = display_df["CREATED_BY"].str.contains(text_search)
 df_search = display_df[search1 | search2 | search3 | search4 | search5 | search6 | search7 | search8]
@@ -100,7 +96,6 @@ else:
         hide_index=True,)
 
 checked = event.selection.rows 
-# if len(event.selection.rows)>0 else [0]
 row = data.iloc[checked]
 
 try:
@@ -114,7 +109,7 @@ try:
     with col4:
         st.button('Run', key=row['ID'].values[0] + ':run', on_click=run_rule, args=(row['TASK_NAME'].values[0], ), disabled=False if checked else True)
     with st.expander("See results"):
-        st.dataframe(st.session_state['session'].sql(f"""select * from result_table where id='{row['ID'].values[0]}'"""), hide_index=True, use_container_width=True)
+        st.dataframe(st.session_state['session'].sql(f"""select * from monitoring_results where rule_id='{row['ID'].values[0]}'"""), hide_index=True, use_container_width=True)
         if st.button(label='', icon=':material/refresh:', key=row['ID'].values[0] + ':refresh', disabled=False if checked else True):
             st.rerun()
 except IndexError:
