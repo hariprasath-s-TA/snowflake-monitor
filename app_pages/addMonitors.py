@@ -277,12 +277,16 @@ def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, l
 Button = st.button("Save and Monitor", disabled = st.session_state['df'].empty)
 if Button:
     try:
-        createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER() as USER""").to_pandas()['USER'][0]
-        for index, row in st.session_state['df'].iterrows():
-            resource_name, params = getParams(warehouse, credits, start_timestamp, end_timestamp, percentage, time, days)
-            coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, resource_name, str(params).replace("'", '"'), createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
-        st.session_state['reset'] = True
-        st.rerun()
+        if not monitor_name in st.session_state['session'].sql("SELECT MONITOR_NAME FROM MONITOR_METADATA").to_pandas()['MONITOR_NAME'].to_list():
+            createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER() as USER""").to_pandas()['USER'].values[0]
+            for index, row in st.session_state['df'].iterrows():
+                resource_name, params = getParams(warehouse, credits, start_timestamp, end_timestamp, percentage, time, days)
+                coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, resource_name, str(params).replace("'", '"'), createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
+            st.session_state['reset'] = True
+            st.success('Monitor added Successfully')
+            st.rerun()
+        else:
+            st.error('Monitor Name already exists')
     except Exception as e:
         st.write(e)
     
