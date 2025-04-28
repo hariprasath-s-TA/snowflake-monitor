@@ -1,8 +1,9 @@
+from streamlit_extras.stylable_container import stylable_container
+
 import streamlit as st
-import pandas as pd
 
 
-st.header("Monitoring Rules")
+st.markdown("<h2 style='text-align: left;'>Monitoring Rules</h2>", unsafe_allow_html=True)
 
 def active_rule(id, state, task):
     st.session_state['session'].sql(f"""
@@ -18,7 +19,7 @@ def active_rule(id, state, task):
             """).collect()
         
 def edit_rule(id):
-    pass
+    print('change')
 
 def delete_rule(id, task):
     st.session_state['session'].sql(f"""
@@ -33,68 +34,83 @@ def run_rule(task):
         execute task task_{task}
         """).collect()
 
+containerStyle = ["""{
+    border: 1px solid #bdc4d5;
+    border-radius: 0.5rem;
+    padding: 8px;
+    overflow: hidden;
+}"""]
+
+results = st.session_state['session'].sql(f"""SELECT * FROM dashboard_stats_view""").to_pandas()
+
+for i in range(len(results)):
+    cols = st.columns(len(results.columns))
+    for j, column in enumerate(results.columns):
+        with cols[j]:
+            with stylable_container(key="containerStyle", css_styles=containerStyle):
+                st.markdown(f'<h3>{column}</h3>', unsafe_allow_html=True)
+                st.markdown(f'<h4>{results.iloc[i][column]}</h4>', unsafe_allow_html=True)
+
 data = st.session_state['session'].sql("""
-    select 
-        mm.id,
-        mm.is_active,
-        mm.monitor_name,
-        mr.name as Monitor_Type,
-        cr.name as Monitor_Category,
-        scr.name as Monitor_SubCategory,
-        ar.name as Monitor_Action,
-        mm.warehouse_name,
-        mm.credit_limit, 
-        mm.percentage,
-        mm.log_times,
-        mm.start_time,
-        mm.end_time,
-        fr.frequency_name,
-        mm.task_name,
-        mm.email_id,
-        mm.created_by
-    from monitor_metadata mm
-    join monitor_registry mr on mm.monitor_id = mr.id
-    join category_registry cr on mm.category_id = cr.id
-    join sub_category_registry scr on mm.sub_category_id = scr.id
-    join actions_registry ar on mm.action_id = ar.id
-    join frequency_registry fr on mm.frequency = fr.frequency_value""").to_pandas()
+    SELECT 
+        *
+    FROM SNOWFLAKE_MONITORING.PUBLIC.DASHBOARD_VIEW""").to_pandas()
 
-for index, row in data.iterrows():
-    st.write(f'Rule {index + 1}:')
-    with st.container(key=row['ID']+':rule_container'):
-        st.dataframe(pd.DataFrame.from_dict({
-            # 'ID': [row['ID']], 
-            'MONITOR_NAME': [row['MONITOR_NAME']],
-            'MONITOR_TYPE': [row['MONITOR_TYPE']],
-            'MONITOR_CATEGORY': [row['MONITOR_CATEGORY']],
-            'MONITOR_SUBCATEGORY': [row['MONITOR_SUBCATEGORY']],
-            'MONITOR_ACTION': [row['MONITOR_ACTION']],
-            'WAREHOUSE_NAME': [row['WAREHOUSE_NAME']],
-            'CREDIT_LIMIT': [row['CREDIT_LIMIT']],
-            'PERCENTAGE': [row['PERCENTAGE']],
-            'LOG_TIMES': [row['LOG_TIMES']],
-            'START_TIME': [row['START_TIME']],
-            'END_TIME': [row['END_TIME']],
-            'FREQUENCY_NAME': [row['FREQUENCY_NAME']],
-            'TASK_NAME': [row['TASK_NAME']],
-            'EMAIL_ID': [row['EMAIL_ID']],
-            'CREATED_BY': [row['CREATED_BY']]
-            }), hide_index=True, use_container_width=True)
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.toggle('Active', value=row['IS_ACTIVE'], key=row['ID']+':active', on_change=active_rule, args=(row['ID'], row['IS_ACTIVE'], row['TASK_NAME'], ))
-        with col2:
-            st.button('Edit', key=row['ID']+':edit', on_click=edit_rule, args=(row['ID'], ))
-        with col3:
-            st.button('Delete', key=row['ID']+':delete', on_click=delete_rule, args=(row['ID'], row['TASK_NAME'], ))
-        with col4:
-            st.button('Run', key=row['ID']+':run', on_click=run_rule, args=(row['TASK_NAME'], ))
-        with st.expander("See results"):
-            st.dataframe(st.session_state['session'].sql(f"""select * from result_table where id='{row['ID']}'"""), hide_index=True, use_container_width=True)
-            if st.button(label='', icon=':material/refresh:', key=row['ID']+ ':refresh'):
-                st.rerun()
-    st.divider()
+display_df = data[[
+    'IS_ACTIVE', 
+    'MONITOR_NAME', 
+    'MONITOR_TYPE', 
+    'MONITOR_CATEGORY', 
+    'MONITOR_SUBCATEGORY', 
+    'MONITOR_ACTION', 
+    'RESOURCE_NAME',
+    'PARAMS',
+    'FREQUENCY_NAME',
+    'TASK_NAME',
+    'EMAIL_ID',
+    'CREATED_BY']]
 
-# st.title('Warehouse result Table')
-# st.dataframe(st.session_state['session'].sql("""select * from snowflake_monitoring.public.warehouse_result""").to_pandas())
+text_search = st.text_input("Search Monitor name, type, category, subcategory, actions, resource name, email_id and created by", value="", placeholder="Type and press enter")
+search1 = display_df["MONITOR_NAME"].str.contains(text_search)
+search2 = display_df["MONITOR_TYPE"].str.contains(text_search)
+search3 = display_df["MONITOR_CATEGORY"].str.contains(text_search)
+search4 = display_df["MONITOR_SUBCATEGORY"].str.contains(text_search)
+search5 = display_df["MONITOR_ACTION"].str.contains(text_search)
+search6 = display_df["RESOURCE_NAME"].str.contains(text_search)
+search7 = display_df["EMAIL_ID"].str.contains(text_search)
+search8 = display_df["CREATED_BY"].str.contains(text_search)
+df_search = display_df[search1 | search2 | search3 | search4 | search5 | search6 | search7 | search8]
+if text_search:
+    event = st.dataframe(
+        df_search, 
+        selection_mode=["single-row"], 
+        on_select='rerun',
+        use_container_width=True,
+        hide_index=True,)
+else:
+    event = st.dataframe(
+        display_df, 
+        selection_mode=["single-row"], 
+        on_select='rerun',
+        use_container_width=True,
+        hide_index=True,)
 
+checked = event.selection.rows 
+row = data.iloc[checked]
+
+try:
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.toggle('Active', value=row['IS_ACTIVE'].values[0], key=row['ID'].values[0] + ':active', on_change=active_rule, args=(row['ID'].values[0], row['IS_ACTIVE'].values[0], row['TASK_NAME'].values[0], ), disabled=False if checked else True)
+    with col2:
+        st.button('Edit', key=row['ID'].values[0] + ':edit', on_click=edit_rule, args=(row['ID'].values[0], ), disabled=False if checked else True)
+    with col3:
+        st.button('Delete', key=row['ID'].values[0] + ':delete', on_click=delete_rule, args=(row['ID'].values[0], row['TASK_NAME'].values[0], ), disabled=False if checked else True)
+    with col4:
+        st.button('Run', key=row['ID'].values[0] + ':run', on_click=run_rule, args=(row['TASK_NAME'].values[0], ), disabled=False if checked else True)
+    with st.expander("See results"):
+        st.dataframe(st.session_state['session'].sql(f"""select * from monitoring_results where rule_id='{row['ID'].values[0]}'"""), hide_index=True, use_container_width=True)
+        if st.button(label='', icon=':material/refresh:', key=row['ID'].values[0] + ':refresh', disabled=False if checked else True):
+            st.rerun()
+except IndexError:
+    st.write('Select any rule from above to continue')
