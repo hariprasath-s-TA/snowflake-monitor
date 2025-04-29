@@ -1,5 +1,3 @@
-from streamlit_extras.stylable_container import stylable_container
-
 import streamlit as st
 
 
@@ -64,33 +62,6 @@ def create_metric_card(title, value, icon):
         """,
         unsafe_allow_html=True
     )
-    st.markdown(
-    """
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-    body {
-        font-family: 'Poppins', sans-serif;  /* Apply Poppins font to the entire app */
-    }
-    .stMarkdown, .stText {
-        font-family: 'Poppins', sans-serif;  /* Custom font for markdown and text */
-    }
-    h1, h2, h3 {
-        font-family: 'Poppins', sans-serif;  /* Custom font for headers */
-    }
-    /* Apply styles for other elements if necessary */
-    .stButton {
-        font-family: 'Poppins', sans-serif;}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-containerStyle = ["""{
-    border: 1px solid #bdc4d5;
-    border-radius: 0.5rem;
-    padding: 8px;
-    overflow: hidden;
-}"""]
 
 results = st.session_state['session'].sql(f"""SELECT * FROM dashboard_stats_view""").to_pandas()
 
