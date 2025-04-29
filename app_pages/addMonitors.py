@@ -72,27 +72,18 @@ if categorySelector:
                 sub_categories.append(subcat['value'])
     st.session_state['reset'] = True
 
-start_timestamp = "NULL"
-end_timestamp = "NULL"
 warehouse = "NULL"
 
 warehouse_data = st.session_state['session'].sql("""SELECT DISTINCT WAREHOUSE_NAME AS WAREHOUSES FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY""").to_pandas()
 if categories_input_type == 'start/end time':
     col1,col2 = st.columns(2)
     with col1:
-        date1 = st.date_input("Start Date",value = None)
-    with col2:
         time1 = st.time_input("Start Time",value = None)
-    col3,col4 = st.columns(2)
-    with col3:
-        date2 = st.date_input("End Date",value = None)
-    with col4:
+    with col2:
         time2 = st.time_input("End Time",value = None)
-    if date1 and time1:
-        start_timestamp = f"'{date1} {time1}'"  
-
-    if date2 and time2:
-        end_timestamp = f"'{date2} {time2}'" 
+    
+        
+    
 elif categories_input_type == 'warehouse':
     warehouse = st.selectbox(
         "Warehouse", 
@@ -280,7 +271,7 @@ if Button:
         if not monitor_name in st.session_state['session'].sql("SELECT MONITOR_NAME FROM MONITOR_METADATA").to_pandas()['MONITOR_NAME'].to_list():
             createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER() as USER""").to_pandas()['USER'].values[0]
             for index, row in st.session_state['df'].iterrows():
-                resource_name, params = getParams(warehouse, credits, start_timestamp, end_timestamp, percentage, time, days)
+                resource_name, params = getParams(warehouse, credits, time1, time2, percentage, time, days)
                 coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, resource_name, str(params).replace("'", '"'), createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
             st.session_state['reset'] = True
             st.success('Monitor added Successfully')
