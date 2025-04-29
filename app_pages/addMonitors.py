@@ -4,6 +4,7 @@ import json
 import streamlit as st
 import pandas as pd
 import uuid
+import streamlit_extras.switch_page_button as switch_page
 
 
 st.markdown("<h2 style='text-align: left;'>Create Monitors</h2>", unsafe_allow_html=True)
@@ -30,7 +31,11 @@ if 'data_dict' not in st.session_state:
 if 'df' not in st.session_state:
     st.session_state['df'] = pd.DataFrame()
 if 'reset' not in st.session_state:
-    st.session_state['reset'] = True
+    st.session_state['reset'] = False
+
+if st.session_state['reset']:
+    st.session_state['df'] = pd.DataFrame()
+    st.session_state['data_dict'] = dict()
 
 for type in data['monitoring_type']:
     monitors.append(type['value'])
@@ -120,7 +125,7 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
                         actions_dict = subcat['action']
                         for act in actions_dict:
                             actions.append(act['value'])
-                st.session_state['reset'] = False
+                # st.session_state['reset'] = False
         with cols[1]:
             if sub_categories_input_type == 'time':
                 time = st.number_input("Number of times",value = None, key="time"+str(i), min_value=0, step=1)
@@ -219,9 +224,6 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
             if st.session_state['no_actions'] > 1:
                 st.session_state['no_actions'] -= 1
             st.rerun()
-    if st.session_state['reset']:
-        st.session_state['df'] = pd.DataFrame()
-        st.session_state['data_dict'] = dict()
     if not st.session_state['df'].empty:
         st.dataframe(st.session_state['df'], hide_index=True, use_container_width=True)
 
@@ -275,9 +277,10 @@ if Button:
                 coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, resource_name, str(params).replace("'", '"'), createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
             st.session_state['reset'] = True
             st.success('Monitor added Successfully')
-            st.rerun()
+            st.switch_page("app_pages/dashboard.py")
         else:
             st.error('Monitor Name already exists')
     except Exception as e:
-        st.write(e)
+        st.session_state['reset'] = True
+        st.error("Kindly check whether you've filled all the inputs")
     
