@@ -33,6 +33,57 @@ def run_rule(task):
     st.session_state['session'].sql(f"""
         execute task task_{task}
         """).collect()
+    
+def create_metric_card(title, value, icon):
+    st.markdown(
+        f"""
+        <style>
+            .metric-card {{
+                background-color: #FFFFFF; /* Orange background */
+                color: black;
+                font-weight: bold;
+                font-size: 18px;
+                border: none;
+                padding: 15px 20px;
+                border-radius: 10px;
+                text-align: center;
+                display: block;
+                width: 100%;
+                box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+                transition: 0.3s;
+            }}
+            .metric-card:hover {{
+                background-color: #E67E22; /* Darker orange on hover */
+                transform: scale(1.05); /* Slight zoom effect */
+            }}
+        </style>
+        <div class="metric-card">
+            <p style="margin:0; font-size: 16px;">{title}</p>
+            <p style="margin:0; font-size: 24px;">{value:,}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    body {
+        font-family: 'Poppins', sans-serif;  /* Apply Poppins font to the entire app */
+    }
+    .stMarkdown, .stText {
+        font-family: 'Poppins', sans-serif;  /* Custom font for markdown and text */
+    }
+    h1, h2, h3 {
+        font-family: 'Poppins', sans-serif;  /* Custom font for headers */
+    }
+    /* Apply styles for other elements if necessary */
+    .stButton {
+        font-family: 'Poppins', sans-serif;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 containerStyle = ["""{
     border: 1px solid #bdc4d5;
@@ -47,9 +98,7 @@ for i in range(len(results)):
     cols = st.columns(len(results.columns))
     for j, column in enumerate(results.columns):
         with cols[j]:
-            with stylable_container(key="containerStyle", css_styles=containerStyle):
-                st.markdown(f'<h3>{column}</h3>', unsafe_allow_html=True)
-                st.markdown(f'<h4>{results.iloc[i][column]}</h4>', unsafe_allow_html=True)
+            create_metric_card(column, results.iloc[i][column], "📊")
 
 data = st.session_state['session'].sql("""
     SELECT 

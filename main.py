@@ -4,7 +4,34 @@ import streamlit as st
 
 
 st.set_page_config(page_title="Snowflake Platform Monitoring", layout="wide")
-st.title("Snowflake Platform Monitoring")
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    body {
+        font-family: 'Poppins', sans-serif;  /* Apply Poppins font to the entire app */
+    }
+    .stMarkdown, .stText {
+        font-family: 'Poppins', sans-serif;  /* Custom font for markdown and text */
+    }
+    h1, h2, h3 {
+        font-family: 'Poppins', sans-serif;  /* Custom font for headers */
+    }
+    /* Apply styles for other elements if necessary */
+    .stButton {
+        font-family: 'Poppins', sans-serif;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+logo_path = "https://www.financialexpress.com/wp-content/uploads/2023/10/My-project-2023-10-17T102736.049.png?w=1024"
+col1, col2 = st.columns([1, 4]) 
+with col1:
+    st.image({logo_path}, width=150)
+with col2:
+    st.markdown("<h1 style='margin-bottom: 0;'>SNOWFLAKE PLATFORM MONITORING</h1>", unsafe_allow_html=True)
+st.markdown("---")
 
 if 'session' not in st.session_state:
     st.session_state['session'] = get_active_session()
