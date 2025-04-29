@@ -4,7 +4,6 @@ import json
 import streamlit as st
 import pandas as pd
 import uuid
-import streamlit_extras.switch_page_button as switch_page
 
 
 st.markdown("<h2 style='text-align: left;'>Create Monitors</h2>", unsafe_allow_html=True)
@@ -125,7 +124,7 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
                         actions_dict = subcat['action']
                         for act in actions_dict:
                             actions.append(act['value'])
-                # st.session_state['reset'] = False
+
         with cols[1]:
             if sub_categories_input_type == 'time':
                 time = st.number_input("Number of times",value = None, key="time"+str(i), min_value=0, step=1)
