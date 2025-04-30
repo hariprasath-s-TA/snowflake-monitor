@@ -5,7 +5,7 @@
             "value": "User Monitoring",
             "category": [
                 {
-                    "key": "C1",
+                    "key": "C2",
                     "value": "Logged over weekend",
                     "user_input": false,
                     "input_type": null,
@@ -53,7 +53,7 @@
                     ]
                 },
                 {
-                    "key": "C2",
+                    "key": "C3",
                     "value": "Logged Between X Hrs and Y Hrs",
                     "user_input": true,
                     "input_type": "start/end time",
@@ -101,13 +101,13 @@
                     ]
                 },
                 {
-                    "key": "C2",
+                    "key": "C4",
                     "value": "Inactive Users",
                     "user_input": false,
                     "input_type": null,
                     "sub_category": [
                         {
-                            "key": "SC1",
+                            "key": "SC5",
                             "value": "Users not logged in for X days",
                             "user_input": true,
                             "input_type": "days",
@@ -129,13 +129,13 @@
                     ]
                 },
                 {
-                    "key": "C3",
+                    "key": "C5",
                     "value": "Login tracking",
                     "user_input": false,
                     "input_type": null,
                     "sub_category": [
                         {
-                            "key": "SC1",
+                            "key": "SC6",
                             "value": "Login failures within short period of time",
                             "user_input": true,
                             "input_type": "days",
@@ -149,7 +149,7 @@
                             ]
                         },
                         {
-                            "key": "SC2",
+                            "key": "SC7",
                             "value": "Rapid access attempts from diverse IP origins",
                             "user_input": true,
                             "input_type": "days",
@@ -167,7 +167,7 @@
             ]
         },
         {
-            "key": "T2",
+            "key": "M2",
             "value": "Warehouse Monitoring",
             "category": [
                 {
@@ -177,7 +177,7 @@
                     "input_type": "warehouse",
                     "sub_category": [
                         {
-                            "key": "SC1",
+                            "key": "SC3",
                             "value": "Consumed More than this Credits",
                             "user_input": true,
                             "input_type": "credits",
@@ -197,7 +197,7 @@
                             ]
                         },
                         {
-                            "key": "SC2",
+                            "key": "SC4",
                             "value": "Consumed More than this % Credits",
                             "user_input": true,
                             "input_type": "credits/percentage",
@@ -221,17 +221,17 @@
             ]
         },
         {
-            "key": "T3",
+            "key": "M3",
             "value": "Database Object Monitoring",
             "category": [
                 {
-                    "key": "C1",
+                    "key": "C7",
                     "value": "Capture DDL operations on Schema",
                     "user_input": true,
                     "input_type": null,
                     "sub_category": [
                         {
-                            "key": "SC1",
+                            "key": "SC11",
                             "value": "Create or Replace Operation",
                             "user_input": true,
                             "input_type": null,
@@ -245,7 +245,7 @@
                             ]
                         },
                         {
-                            "key": "SC2",
+                            "key": "SC12",
                             "value": "Drop Operation",
                             "user_input": true,
                             "input_type": null,
@@ -259,7 +259,7 @@
                             ]
                         },
                         {
-                            "key": "SC3",
+                            "key": "SC13",
                             "value": "Create or Replace or Drop Operation",
                             "user_input": true,
                             "input_type": null,
@@ -275,13 +275,13 @@
                     ]
                 },
                 {
-                    "key": "C2",
+                    "key": "C8",
                     "value": "Capture DDL operations on Table",
                     "user_input": true,
                     "input_type": null,
                     "sub_category": [
                         {
-                            "key": "SC1",
+                            "key": "SC14",
                             "value": "Delete or Truncate Operation",
                             "user_input": true,
                             "input_type": null,
@@ -295,7 +295,7 @@
                             ]
                         },
                         {
-                            "key": "SC2",
+                            "key": "SC12",
                             "value": "Drop Operation",
                             "user_input": true,
                             "input_type": null,
@@ -309,7 +309,7 @@
                             ]
                         },
                         {
-                            "key": "SC3",
+                            "key": "SC16",
                             "value": "Delete or Truncate or Drop Operation",
                             "user_input": true,
                             "input_type": null,
@@ -325,14 +325,70 @@
                     ]
                 },
                 {
-                    "key": "C3",
+                    "key": "C9",
                     "value": "Observe Table Data",
                     "user_input": true,
                     "input_type": null,
                     "sub_category": [
                         {
-                            "key": "SC1",
+                            "key": "SC17",
                             "value": "Tables with zero quries over time",
+                            "user_input": true,
+                            "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "M4",
+            "value": "Query Monitoring",
+            "category": [
+                {
+                    "key": "C6",
+                    "value": "Query Workloads",
+                    "user_input": false,
+                    "input_type": null,
+                    "sub_category": [
+                        {
+                            "key": "SC18",
+                            "value": "Queries Exceeding Time Limit",
+                            "user_input": true,
+                            "input_type": "time",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC19",
+                            "value": "Concurrent Query Load By Warehouse",
+                            "user_input": true,
+                            "input_type": "days",
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC3",
+                            "value": "Create or Replace or Drop Operation",
                             "user_input": true,
                             "input_type": null,
                             "action": [
