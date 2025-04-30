@@ -385,20 +385,6 @@
                                     "input_type": "email"
                                 }
                             ]
-                        },
-                        {
-                            "key": "SC3",
-                            "value": "Create or Replace or Drop Operation",
-                            "user_input": true,
-                            "input_type": null,
-                            "action": [
-                                {
-                                    "key": "A1",
-                                    "value": "Email",
-                                    "user_input": true,
-                                    "input_type": "email"
-                                }
-                            ]
                         }
                     ]
                 }
