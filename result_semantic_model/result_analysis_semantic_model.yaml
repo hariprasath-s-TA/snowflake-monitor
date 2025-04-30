@@ -4,11 +4,11 @@ tables:
   - name: MONITORING_RESULTS
     synonyms:
       - Monitoring_Outcomes
-      - Rule_Performance
-      - Action_Reports
-      - Rule_Status_Log
-      - Performance_Reviews
-    description: "\"Stores monitoring results for rules, including actions taken and timestamps.\""
+      - Rule_Execution_Log
+      - Action_Registry
+      - Performance_Record
+      - Compliance_Report
+    description: "\"Table to store monitoring results, including rule execution details and actions taken.\""
     base_table:
       database: SNOWFLAKE_MONITORING
       schema: PUBLIC
@@ -96,15 +96,26 @@ tables:
         description: "Name of the monitored resource."
         expr: RESOURCE_NAME
         data_type: TEXT
+      - name: COMMENTS
+        synonyms:
+          - Notes
+          - Observations
+          - Remarks
+          - Feedback
+          - Insights
+        description: "Free-text comments or notes related to monitoring results."
+        expr: COMMENTS
+        data_type: TEXT
+    time_dimensions:
       - name: RULE_RUN_TIMESTAMP
         synonyms:
-          - RuleExecutionTime
-          - RunTimestamp
-          - RuleRunDate
-          - ExecutionDateTime
-          - RunTimeStamp
+          - Rule_Run_Date
+          - Rule_Run_Time
+          - Timestamp_of_Rule_Run
+          - Rule_Run_Moment
+          - Rule_Run_Instance
         description: "Timestamp of rule run."
         expr: RULE_RUN_TIMESTAMP
-        data_type: TEXT
+        data_type: TIMESTAMP_NTZ
 relationships:
 custom_instructions: ""
