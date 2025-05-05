@@ -1,3 +1,4 @@
 dependencies:
 - streamlit=1.39.0
 - streamlit-extras
+- plotly
