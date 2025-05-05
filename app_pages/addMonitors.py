@@ -77,14 +77,14 @@ if categorySelector:
     st.session_state['reset'] = True
 
 warehouse = "NULL"
-
+time1, time2 = '', ''
 warehouse_data = st.session_state['session'].sql("""SELECT DISTINCT WAREHOUSE_NAME AS WAREHOUSES FROM SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY""").to_pandas()
 if categories_input_type == 'start/end time':
     col1,col2 = st.columns(2)
     with col1:
-        time1 = st.time_input("Start Time",value = None)
+        time1 = st.number_input("Start Time",value = None)
     with col2:
-        time2 = st.time_input("End Time",value = None)
+        time2 = st.number_input("End Time",value = None)
     
         
     
@@ -246,11 +246,11 @@ def coreProc(monitorName, monitorType, category, subcategory, action, resourceNa
     actionId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.ACTIONS_REGISTRY WHERE NAME = '{action}'""").to_pandas()['ID'].values[0])
     isActive = True
     taskName = monitorName
-    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUB_CATEGORY_ID = '{subCategoryId}' AND CATEGORY_ID = '{categoryId}'""").to_pandas()['ID'].values[0])
+    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUB_CATEGORY_ID LIKE '%{subCategoryId}%' AND CATEGORY_ID LIKE '%{categoryId}%'""").to_pandas()['ID'].values[0])
     procedure = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE ID = '{procedureId}'""").to_pandas()['PROCEDURE_NAME'].values[0])
     insertQuery = f"""INSERT INTO SNOWFLAKE_MONITORING.PUBLIC.MONITOR_METADATA VALUES('{id}', '{monitorName}', '{monitorId}', '{categoryId}', '{subCategoryId}', '{actionId}', '{resourceName}', '{params}', '{frequency}', '{isActive}', '{taskName}', '{email_id}', '{createdBy}', '{createdAt}')"""
     st.session_state['session'].sql(insertQuery).collect()
-    create_task(frequency, taskName, f"call {procedure}('{id}')")
+    create_task(frequency, str(taskName).replace(' ', '_'), f"call {procedure}('{id}')")
 
 def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times, days):
     params = {}
@@ -281,5 +281,6 @@ if Button:
             st.error('Monitor Name already exists')
     except Exception as e:
         st.session_state['reset'] = True
+        st.write(e)
         st.error("Kindly check whether you've filled all the inputs")
     

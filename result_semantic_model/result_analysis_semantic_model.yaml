@@ -36,6 +36,11 @@ tables:
         description: "Type of monitoring activity."
         expr: MONITORING_TYPE
         data_type: TEXT
+        sample_values:
+           - User Monitoring
+           - Query Monitoring
+           - Database Object Monitoring
+           - Warehouse Monitoring
       - name: CATEGORY
         synonyms:
           - Class
@@ -46,6 +51,11 @@ tables:
         description: "Category of monitored item."
         expr: CATEGORY
         data_type: TEXT
+        sample_values:
+           - Logged over weekend
+           - Query Workloads
+           - Capture DDL operations on Table
+           - Credit Consumption MTD
       - name: SUBCATEGORY
         synonyms:
           - Category
@@ -56,6 +66,11 @@ tables:
         description: "Subcategory of monitored metric."
         expr: SUBCATEGORY
         data_type: TEXT
+        sample_values:
+           - Logged once
+           - Flag queries exceeding 30s execution time limits
+           - Create or Replace Operation
+           - Consumed More than this Credits
       - name: ACTIONS
         synonyms:
           - Steps
@@ -66,6 +81,10 @@ tables:
         description: "Action taken during monitoring."
         expr: ACTIONS
         data_type: TEXT
+        sample_values:
+           - Email
+           - SMS
+           - None
       - name: ACTION_MESSAGE
         synonyms:
           - "Alert Text"
@@ -76,6 +95,11 @@ tables:
         description: "Action message received from monitoring system."
         expr: ACTION_MESSAGE
         data_type: TEXT
+        sample_values:
+           - Nill
+           - Alert sent to user
+           - Notified query owner
+           - Lesser than credit limit
       - name: ACTION_TAKEN
         synonyms:
           - StepsTaken
@@ -83,8 +107,11 @@ tables:
           - MonitoringOutcome
           - TeamAction
           - ResolutionSteps
-        description: "Action taken by the monitoring team."
+        description: "This indicates if action is taken or not. Yes for action taken and no for no action taken"
         expr: ACTION_TAKEN
+        sample_values:
+           - No
+           - Yes
         data_type: TEXT
       - name: RESOURCE_NAME
         synonyms:
@@ -96,6 +123,11 @@ tables:
         description: "Name of the monitored resource."
         expr: RESOURCE_NAME
         data_type: TEXT
+        sample_values:
+           - Compute_wh
+           - Capstone_wh
+           - dwhbi_developer_wh
+           - COMPUTE_WH_2
       - name: COMMENTS
         synonyms:
           - Notes
@@ -117,5 +149,10 @@ tables:
         description: "Timestamp of rule run."
         expr: RULE_RUN_TIMESTAMP
         data_type: TIMESTAMP_NTZ
+        sample_values:
+           - '2025-04-01 00:00:00'
+           - '2025-04-01 01:00:00'
+           - '2025-04-04 00:00:00'
+           - '2025-04-24T11:56:13.946000000'
 relationships:
 custom_instructions: ""

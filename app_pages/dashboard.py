@@ -1,4 +1,6 @@
 import streamlit as st
+import plotly.express as px
+import pandas as pd
 
 
 st.markdown("<h2 style='text-align: left;'>Monitoring Rules</h2>", unsafe_allow_html=True)
@@ -9,11 +11,11 @@ def active_rule(id, state, task):
         """).collect()
     if not state:
         st.session_state['session'].sql(f"""
-            alter task if exists task_{task} resume
+            alter task if exists task_{str(task).replace(' ', '_')} resume
             """).collect()
     else:
         st.session_state['session'].sql(f"""
-            alter task if exists task_{task} suspend
+            alter task if exists task_{str(task).replace(' ', '_')} suspend
             """).collect()
         
 def edit_rule(id):
@@ -24,12 +26,12 @@ def delete_rule(id, task):
         delete from monitor_metadata where id = '{id}'
         """).collect()
     st.session_state['session'].sql(f"""
-        drop task if exists task_{task}
+        drop task if exists task_{str(task).replace(' ', '_')}
         """).collect()
 
 def run_rule(task):
     st.session_state['session'].sql(f"""
-        execute task task_{task}
+        execute task task_{str(task).replace(' ', '_')}
         """).collect()
     
 def create_metric_card(title, value, icon):
@@ -70,6 +72,14 @@ for i in range(len(results)):
     for j, column in enumerate(results.columns):
         with cols[j]:
             create_metric_card(column, results.iloc[i][column], "📊")
+import plotly.graph_objects as go
+
+chart_data = st.session_state['session'].sql("""select monitoring_type, count(action_taken) as action_count from monitoring_results where action_taken='Yes' group by monitoring_type""").to_pandas()
+fig = px.line(chart_data, x="MONITORING_TYPE", y="ACTION_COUNT", title='Actions', width=600, height=450)
+fig = go.Figure()
+# fig.add_trace(go.Scatter(x=chart_data['MONITORING_TYPE'], y=chart_data['ACTION_COUNT'], mode='lines', name='Line 1'))
+fig.add_trace(go.Scatter(x=chart_data['MONITORING_TYPE'], y=chart_data['ACTION_COUNT'], mode='lines', name='Line 2'))
+st.plotly_chart(fig, theme=None, use_container_width=True)
 
 data = st.session_state['session'].sql("""
     SELECT 
