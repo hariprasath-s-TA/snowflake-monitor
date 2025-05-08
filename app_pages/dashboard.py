@@ -74,11 +74,8 @@ for i in range(len(results)):
             create_metric_card(column, results.iloc[i][column], "📊")
 import plotly.graph_objects as go
 
-chart_data = st.session_state['session'].sql("""select monitoring_type, count(action_taken) as action_count from monitoring_results where action_taken='Yes' group by monitoring_type""").to_pandas()
-fig = px.line(chart_data, x="MONITORING_TYPE", y="ACTION_COUNT", title='Actions', width=600, height=450)
-fig = go.Figure()
-# fig.add_trace(go.Scatter(x=chart_data['MONITORING_TYPE'], y=chart_data['ACTION_COUNT'], mode='lines', name='Line 1'))
-fig.add_trace(go.Scatter(x=chart_data['MONITORING_TYPE'], y=chart_data['ACTION_COUNT'], mode='lines', name='Line 2'))
+chart_data = st.session_state['session'].sql("""select monitoring_type, count(action_taken) as action_count, date(rule_run_timestamp) as rule_run_timestamp from monitoring_results where action_taken='Yes' group by monitoring_type, rule_run_timestamp order by 3, 2""").to_pandas()
+fig = px.bar(chart_data, x="RULE_RUN_TIMESTAMP", y="ACTION_COUNT", title='Actions', width=600, height=450, color='MONITORING_TYPE')
 st.plotly_chart(fig, theme=None, use_container_width=True)
 
 data = st.session_state['session'].sql("""
