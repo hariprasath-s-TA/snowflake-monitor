@@ -96,7 +96,7 @@ elif categories_input_type == 'warehouse':
         placeholder='Select Warehouse',
         )
 
-time, credits, percentage, email, days = 'NULL', 'NULL', 'NULL', 'NULL', 'NULL'
+time, credits, percentage, email, days, db_name, table_name, threshold_value = 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL'
 st.session_state['data_dict'][categorySelector] = []
 with stylable_container(key="containerStyle", css_styles=containerStyle):
     st.subheader('Add Upto 3 Rules')
@@ -124,6 +124,16 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
                         actions_dict = subcat['action']
                         for act in actions_dict:
                             actions.append(act['value'])
+            if sub_categories_input_type == 'db_name/table_name/threshold_value':
+                db_name = st.selectbox(
+                    "Select Database",
+                    set(pd.DataFrame(st.session_state['session'].sql('SHOW DATABASES').collect())['name'].to_list()),
+                    index=None,
+                    placeholder="Select database",
+                    key="db_name"+str(i),
+                    disabled=False
+                    )
+                threshold_unit = st.selectbox("Select Threshold Unit",['Days', 'Hours', 'Weeks'],key="threshold_unit"+str(i))
 
         with cols[1]:
             if sub_categories_input_type == 'time':
@@ -135,6 +145,18 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
                 percentage = st.number_input("Percentage to be Checked",value=None,key="num1"+str(i), min_value=0, step=1)
             elif sub_categories_input_type == 'credits':
                 credits = st.text_input("Enter Credit Limit",value=None,key="text1"+str(i))
+            elif sub_categories_input_type == 'db_name/table_name/threshold_value':
+                dummy = st.text_input("Enter value", disabled=True, key="dummy"+str(i), value=None)
+                table_name = st.selectbox(
+                    "Select Table",
+                    set([f"{row['TABLE_SCHEMA']}.{row['TABLE_NAME']}" for row in st.session_state['session'].sql(f"""select table_schema, table_name from {db_name}.information_schema.tables where table_schema != 'INFORMATION_SCHEMA'""").collect()] if db_name else ['Select Database']),
+                    index=None,
+                    placeholder="Select table",
+                    key="table_name"+str(i),
+                    disabled=False
+                    )
+                if threshold_unit:
+                    threshold_value = st.number_input("Enter Threshold", key="threshold_value"+str(i), min_value=1)
             else:
                 dummy = st.text_input("Enter value", disabled=True, key="dummy"+str(i), value=None)
         
@@ -252,7 +274,7 @@ def coreProc(monitorName, monitorType, category, subcategory, action, resourceNa
     st.session_state['session'].sql(insertQuery).collect()
     create_task(frequency, str(taskName).replace(' ', '_'), f"call {procedure}('{id}')")
 
-def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times, days):
+def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times, days, db_name, table_name, threshold_unit, threshold_value):
     params = {}
     if warehouse_name:
         resource_name = warehouse_name
@@ -264,6 +286,10 @@ def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, l
     params["percentage"] = percentage
     params["log_times"] = log_times
     params["days"] = days
+    params["db_name"] = db_name
+    params["table_name"] = table_name
+    params["threshold_unit"] = threshold_unit
+    params["threshold_value"] = threshold_value
     return resource_name, params
 
 Button = st.button("Save and Monitor", disabled = st.session_state['df'].empty)
@@ -272,7 +298,7 @@ if Button:
         if not monitor_name in st.session_state['session'].sql("SELECT MONITOR_NAME FROM MONITOR_METADATA").to_pandas()['MONITOR_NAME'].to_list():
             createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER() as USER""").to_pandas()['USER'].values[0]
             for index, row in st.session_state['df'].iterrows():
-                resource_name, params = getParams(warehouse, credits, time1, time2, percentage, time, days)
+                resource_name, params = getParams(warehouse, credits, time1, time2, percentage, time, days, db_name, table_name, threshold_unit, threshold_value)
                 coreProc(monitor_name, typeSelector, categorySelector, subcategorySelector, actionSelector, resource_name, str(params).replace("'", '"'), createdBy, row['Frequency'], row['Action_Value'], st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
             st.session_state['reset'] = True
             st.success('Monitor added Successfully')

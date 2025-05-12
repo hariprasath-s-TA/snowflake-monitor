@@ -327,14 +327,28 @@
                 {
                     "key": "C9",
                     "value": "Observe Table Data",
-                    "user_input": true,
+                    "user_input": false,
                     "input_type": null,
                     "sub_category": [
                         {
                             "key": "SC17",
                             "value": "Tables with zero quries over time",
-                            "user_input": true,
+                            "user_input": false,
                             "input_type": null,
+                            "action": [
+                                {
+                                    "key": "A1",
+                                    "value": "Email",
+                                    "user_input": true,
+                                    "input_type": "email"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "SC20",
+                            "value": "Table Freshness",
+                            "user_input": true,
+                            "input_type": "db_name/table_name/threshold_value",
                             "action": [
                                 {
                                     "key": "A1",
