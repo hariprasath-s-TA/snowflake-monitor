@@ -134,14 +134,16 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
                     disabled=False
                     )
                 threshold_unit = st.selectbox("Select Threshold Unit",['Days', 'Hours', 'Weeks'],key="threshold_unit"+str(i))
+            elif sub_categories_input_type == 'credits/percentage':
+                credits = st.text_input("Enter Credit Limit",value=None,key="text"+str(i))
 
         with cols[1]:
             if sub_categories_input_type == 'time':
-                time = st.number_input("Number of times",value = None, key="time"+str(i), min_value=0, step=1)
+                time = st.number_input("Time Limit",value = None, key="time"+str(i), min_value=0, step=1)
             elif sub_categories_input_type == 'days':
-                days = st.number_input("No. of days",value=None,key="num"+str(i),min_value=0, step=1)
+                days = st.number_input("No. of Queries" if subcategorySelector == 'Concurrent Query Load By Warehouse' else"No. of days",value=None,key="num"+str(i),min_value=0, step=1)
             elif sub_categories_input_type == 'credits/percentage':
-                credits = st.text_input("Enter Credit Limit",value=None,key="text"+str(i))
+                dummy = st.text_input("Enter value", disabled=True, key="dummy"+str(i), value=None)
                 percentage = st.number_input("Percentage to be Checked",value=None,key="num1"+str(i), min_value=0, step=1)
             elif sub_categories_input_type == 'credits':
                 credits = st.text_input("Enter Credit Limit",value=None,key="text1"+str(i))
