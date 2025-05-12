@@ -26,7 +26,7 @@ def reset_session_state():
 
 def show_header_and_sidebar():
     st.markdown("<h2 style='text-align: left;'>Result Analysis</h2>", unsafe_allow_html=True)
-    st.dataframe(st.session_state['session'].sql("SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITORING_RESULTS"), hide_index=True, use_container_width=True)
+    st.dataframe(st.session_state['session'].sql("SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITORING_RESULTS").to_pandas(), hide_index=True, use_container_width=True)
     with st.sidebar:
         _, btn_container, _ = st.columns([2, 6, 2])
         if btn_container.button("Clear Chat History", use_container_width=True):
