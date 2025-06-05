@@ -1,0 +1,53 @@
+
+
+.custom-topbar {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0E1117;
+    border-radius: 0px;
+    padding: 0px 20px 5px 20px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 75px;
+    z-index: 999;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    flex: 1;  /* Ensures the left section doesn't take more space than needed */
+}
+
+.topbar-center {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    margin-left: 50px;
+    flex: 2;  /* Ensures the title section takes up more space and is centered */
+}
+
+.topbar-logo {
+    width: 120px;
+    height: 50px;
+    margin-right: 10px;
+    padding-top: 6px;
+}
+
+
+.topbar-title {
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    font-family: "Poppins";
+}
+
+.topbar-username {
+    color: white;
+    font-size: 16px;
+    padding-right: 10px;
+    font-family: "Poppins";
+}

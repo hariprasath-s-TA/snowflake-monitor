@@ -4,7 +4,7 @@ from snowflake.snowpark.exceptions import SnowparkSQLException
 
 import json
 import time
-import _snowflake
+import requests
 import pandas as pd
 import streamlit as st
 import tempfile
@@ -12,12 +12,9 @@ import os
 import yaml
 
 
-session = get_active_session()
-
 SEMANTIC_MODEL_PATH = "SNOWFLAKE_MONITORING.PUBLIC.SNOWFLAKE_MONITORING_APP_STAGE/result_semantic_model/result_analysis_semantic_model.yaml"
-API_ENDPOINT = "/api/v2/cortex/analyst/message"
+API_ENDPOINT = "https://hpa63785.snowflakecomputing.com/api/v2/cortex/analyst/message"
 API_TIMEOUT = 50000
-
 
 def reset_session_state():
     st.session_state.messages = [] 
@@ -26,7 +23,7 @@ def reset_session_state():
 
 def show_header_and_sidebar():
     st.markdown("<h2 style='text-align: left;'>Result Analysis</h2>", unsafe_allow_html=True)
-    st.dataframe(st.session_state['session'].sql("SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITORING_RESULTS"), hide_index=True, use_container_width=True)
+    # st.dataframe(st.session_state['session'].sql("SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITORING_RESULTS").to_pandas(), hide_index=True, use_container_width=True)
     with st.sidebar:
         _, btn_container, _ = st.columns([2, 6, 2])
         if btn_container.button("Clear Chat History", use_container_width=True):
@@ -82,30 +79,16 @@ def get_analyst_response(messages: List[Dict]) -> Tuple[Dict, Optional[str]]:
         "messages": messages,
         "semantic_model_file": f"@{SEMANTIC_MODEL_PATH}",
     }
-    resp = _snowflake.send_snow_api_request(
-        "POST",
-        API_ENDPOINT, 
-        {}, 
-        {}, 
-        request_body, 
-        None, 
-        API_TIMEOUT, 
+    resp = requests.post(
+        url=API_ENDPOINT,
+        json=request_body,
+        headers={
+            "Authorization": f'Snowflake Token="{st.session_state.session.connection.rest.token}"',
+            "Content-Type": "application/json",
+        },
     )
-    parsed_content = json.loads(resp["content"])
-    if resp["status"] < 400:
-        return parsed_content, None
-    else:
-        error_msg = f"""
-:rotating_light: An Analyst API error has occurred :rotating_light:
-* response code: `{resp['status']}`
-* request-id: `{parsed_content['request_id']}`
-* error code: `{parsed_content['error_code']}`
-Message:
-```
-{parsed_content['message']}
-```
-        """
-        return parsed_content, error_msg
+    parsed_content = json.loads(resp.text)
+    return parsed_content, None
 
 def display_conversation():
     for idx, message in enumerate(st.session_state.messages):
@@ -131,9 +114,8 @@ def display_message(content: List[Dict[str, str]], message_index: int):
 
 @st.cache_data(show_spinner=False)
 def get_query_exec_result(query: str) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
-    global session
     try:
-        df = session.sql(query).to_pandas()
+        df = st.session_state['session'].sql(query).to_pandas()
         return df, None
     except SnowparkSQLException as e:
         return None, str(e)
@@ -151,7 +133,7 @@ def display_sql_query(sql: str, message_index: int):
                 'sql': sql, 
                 'verified_at': verified_at
             }
-            file = session.file.get_stream(f"@{yaml_file}")
+            file = st.session_state['session'].file.get_stream(f"@{yaml_file}")
             yml_data = yaml.safe_load(file.read())
 
             if 'verified_queries' in yml_data.keys():
@@ -165,7 +147,7 @@ def display_sql_query(sql: str, message_index: int):
                 with open(tmp_file_path, "w", encoding="utf-8") as temp_file:
                     yaml.safe_dump(yml_data, temp_file, sort_keys=False)
 
-                session.file.put(
+                st.session_state['session'].file.put(
                     tmp_file_path,
                     f"@{stage_name}",
                     auto_compress=False,
@@ -213,12 +195,12 @@ def display_charts_tab(df: pd.DataFrame, message_index: int) -> None:
     else:
         st.write("At least 2 columns are required")
 
-
-if "messages" not in st.session_state:
-    reset_session_state()
-show_header_and_sidebar()
-if len(st.session_state.messages) == 0:
-    process_user_input("Tell me about the data")
-display_conversation()
-handle_user_inputs()
-handle_error_notifications()
+def askAssistant():
+    if "messages" not in st.session_state:
+        reset_session_state()
+    show_header_and_sidebar()
+    if len(st.session_state.messages) == 0:
+        process_user_input("Tell me about the data")
+    display_conversation()
+    handle_user_inputs()
+    handle_error_notifications()
