@@ -404,5 +404,52 @@
                 }
             ]
         }
+    ],
+    "defaults": [
+        {
+            "name": "User logged in once over weekend",
+            "value": "User Monitoring",
+            "user_input": false,
+            "input_type": null,
+            "category": {
+                "value": "Logged over weekend",
+                "sub_category": {
+                    "value": "Logged Once",
+                    "action": {
+                        "value": "Email"
+                    }
+                }
+            }
+        },
+        {
+            "name": "Inactive Users for X days",
+            "value": "User Monitoring",
+            "user_input": true,
+            "input_type": "days",
+            "category": {
+                "value": "Inactive Users",
+                "sub_category": {
+                    "value": "Users not logged in for X days",
+                    "action": {
+                        "value": "Email"
+                    }
+                }
+            }
+        },
+        {
+            "name": "Consumed More than this Credits in a Warehouse",
+            "value": "Warehouse Monitoring",
+            "user_input": true,
+            "input_type": "credits",
+            "category": {
+                "value": "Credit Consumption MTD",
+                "sub_category": {
+                    "value": "Consumed More than this Credits",
+                    "action": {
+                        "value": "Email"
+                    }
+                }
+            }
+        }
     ]
 }

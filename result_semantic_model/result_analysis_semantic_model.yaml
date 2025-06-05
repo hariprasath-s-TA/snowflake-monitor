@@ -155,4 +155,4 @@ tables:
            - '2025-04-04 00:00:00'
            - '2025-04-24T11:56:13.946000000'
 relationships:
-custom_instructions: ""
+custom_instructions: "For filter purpose for column Action_taken use Yes/No don't use True/False"

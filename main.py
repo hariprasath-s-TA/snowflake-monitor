@@ -34,13 +34,27 @@ with col2:
 st.markdown("---")
 
 if 'session' not in st.session_state:
-    st.session_state['session'] = get_active_session()
+    from snowflake.snowpark.session import Session
+
+    config = {
+        "account": "hdfeymr-tigeranalytics_partner",
+        "user": "dwhbi_developer",
+        "password": "Tiger@dwhbi1",
+        "role": "dwhbi_developer",
+        "warehouse": "dwhbi_developer_wh",
+        "database": "snowflake_monitoring",
+        "schema": "public"
+    }
+
+    st.session_state['session'] = Session.builder.configs(config).create()
+    # st.session_state['session'] = get_active_session()
 
 st.session_state['session'].sql("CALL AUTOMATE_DASHBOARD_VIEW()").collect()
 
 pg = st.navigation([
     st.Page("app_pages/dashboard.py", title="Overview", icon="🖥️"),
     st.Page("app_pages/addMonitors.py", title="Create Monitors", icon="➕"),
-    st.Page("app_pages/resultsDashboard.py", title="Ask Assistant", icon="📈")
+    st.Page("app_pages/resultsDashboard.py", title="Ask Assistant", icon="📈"),
+    st.Page("app_pages/defaultMonitors.py", title="Default Monitors", icon="🗄️")
 ])
 pg.run()

@@ -14,7 +14,53 @@ containerStyle = ["""{
     overflow: hidden;
 }"""]
 
-with st.session_state['session'].file.get_stream('@"SNOWFLAKE_MONITORING"."PUBLIC"."SNOWFLAKE_MONITORING_APP_STAGE"/data.json') as file:
+# with st.session_state['session'].file.get_stream('@"SNOWFLAKE_MONITORING"."PUBLIC"."SNOWFLAKE_MONITORING_APP_STAGE"/data.json') as file:
+#     data = json.load(file)
+
+def create_task(frequency, task_name, procedure):
+    task = f"""
+        CREATE OR REPLACE TASK task_{task_name}
+        WAREHOUSE = dwhbi_developer_wh
+        SCHEDULE = 'USING CRON {frequency}'
+        AS
+        {procedure}"""
+    resume_task = f"""ALTER TASK IF EXISTS task_{task_name} RESUME"""
+    st.session_state['session'].sql(task).collect()
+    st.session_state['session'].sql(resume_task).collect()
+
+def coreProc(monitorName, monitorType, category, subcategory, action, resourceName, params, createdBy, frequency, email_id, createdAt):
+    id = uuid.uuid1().hex
+    monitorId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITOR_REGISTRY WHERE NAME = '{monitorType}'""").to_pandas()['ID'].values[0])
+    categoryId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.CATEGORY_REGISTRY WHERE NAME = '{category}'""").to_pandas()['ID'].values[0])
+    subCategoryId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.SUB_CATEGORY_REGISTRY WHERE NAME = '{subcategory}'""").to_pandas()['ID'].values[0])
+    actionId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.ACTIONS_REGISTRY WHERE NAME = '{action}'""").to_pandas()['ID'].values[0])
+    isActive = True
+    taskName = monitorName
+    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUB_CATEGORY_ID LIKE '%{subCategoryId}%' AND CATEGORY_ID LIKE '%{categoryId}%'""").to_pandas()['ID'].values[0])
+    procedure = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE ID = '{procedureId}'""").to_pandas()['PROCEDURE_NAME'].values[0])
+    insertQuery = f"""INSERT INTO SNOWFLAKE_MONITORING.PUBLIC.MONITOR_METADATA VALUES('{id}', '{monitorName}', '{monitorId}', '{categoryId}', '{subCategoryId}', '{actionId}', '{resourceName}', '{params}', '{frequency}', '{isActive}', '{taskName}', '{email_id}', '{createdBy}', '{createdAt}')"""
+    st.session_state['session'].sql(insertQuery).collect()
+    create_task(frequency, str(taskName).replace(' ', '_'), f"call {procedure}('{id}')")
+
+def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times, days, db_name, table_name, threshold_unit, threshold_value):
+    params = {}
+    if warehouse_name:
+        resource_name = warehouse_name
+    else:
+        resource_name = "NULL"
+    params["credits_limit"] = credits_limit
+    params["start_time"] = start_time
+    params["end_time"] = end_time
+    params["percentage"] = percentage
+    params["log_times"] = log_times
+    params["days"] = days
+    params["db_name"] = db_name
+    params["table_name"] = table_name
+    params["threshold_unit"] = threshold_unit
+    params["threshold_value"] = threshold_value
+    return resource_name, params
+
+with open('data.json', 'r') as file:
     data = json.load(file)
 
 categories = []
@@ -36,6 +82,18 @@ if st.session_state['reset']:
     st.session_state['df'] = pd.DataFrame()
     st.session_state['data_dict'] = dict()
 
+# defaultMonitors = []
+# for default in data['defaults']:
+#     defaultMonitors.append(default['name'])
+
+# defaultMonitorSelector = st.selectbox(
+#         "Select Default Monitor",
+#         set(defaultMonitors),
+#         index=None,
+#         placeholder="Available Default Monitors",
+#     )
+
+# if not defaultMonitorSelector:
 for type in data['monitoring_type']:
     monitors.append(type['value'])
 
@@ -96,7 +154,7 @@ elif categories_input_type == 'warehouse':
         placeholder='Select Warehouse',
         )
 
-time, credits, percentage, email, days, db_name, table_name, threshold_value = 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL'
+time, credits, percentage, email, days, db_name, table_name, threshold_value, threshold_unit = 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL'
 st.session_state['data_dict'][categorySelector] = []
 with stylable_container(key="containerStyle", css_styles=containerStyle):
     st.subheader('Add Upto 3 Rules')
@@ -249,51 +307,6 @@ with stylable_container(key="containerStyle", css_styles=containerStyle):
             st.rerun()
     if not st.session_state['df'].empty:
         st.dataframe(st.session_state['df'], hide_index=True, use_container_width=True)
-
-def create_task(frequency, task_name, procedure):
-    task = f"""
-        CREATE OR REPLACE TASK task_{task_name}
-        WAREHOUSE = dwhbi_developer_wh
-        SCHEDULE = 'USING CRON {frequency}'
-        AS
-        {procedure}"""
-    resume_task = f"""ALTER TASK IF EXISTS task_{task_name} RESUME"""
-    st.session_state['session'].sql(task).collect()
-    st.session_state['session'].sql(resume_task).collect()
-
-
-def coreProc(monitorName, monitorType, category, subcategory, action, resourceName, params, createdBy, frequency, email_id, createdAt):
-    id = uuid.uuid1().hex
-    monitorId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.MONITOR_REGISTRY WHERE NAME = '{monitorType}'""").to_pandas()['ID'].values[0])
-    categoryId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.CATEGORY_REGISTRY WHERE NAME = '{category}'""").to_pandas()['ID'].values[0])
-    subCategoryId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.SUB_CATEGORY_REGISTRY WHERE NAME = '{subcategory}'""").to_pandas()['ID'].values[0])
-    actionId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.ACTIONS_REGISTRY WHERE NAME = '{action}'""").to_pandas()['ID'].values[0])
-    isActive = True
-    taskName = monitorName
-    procedureId = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE SUB_CATEGORY_ID LIKE '%{subCategoryId}%' AND CATEGORY_ID LIKE '%{categoryId}%'""").to_pandas()['ID'].values[0])
-    procedure = str(st.session_state['session'].sql(f"""SELECT * FROM SNOWFLAKE_MONITORING.PUBLIC.PROCEDURE_REGISTRY WHERE ID = '{procedureId}'""").to_pandas()['PROCEDURE_NAME'].values[0])
-    insertQuery = f"""INSERT INTO SNOWFLAKE_MONITORING.PUBLIC.MONITOR_METADATA VALUES('{id}', '{monitorName}', '{monitorId}', '{categoryId}', '{subCategoryId}', '{actionId}', '{resourceName}', '{params}', '{frequency}', '{isActive}', '{taskName}', '{email_id}', '{createdBy}', '{createdAt}')"""
-    st.session_state['session'].sql(insertQuery).collect()
-    create_task(frequency, str(taskName).replace(' ', '_'), f"call {procedure}('{id}')")
-
-def getParams(warehouse_name, credits_limit, start_time, end_time, percentage, log_times, days, db_name, table_name, threshold_unit, threshold_value):
-    params = {}
-    if warehouse_name:
-        resource_name = warehouse_name
-    else:
-        resource_name = "NULL"
-    params["credits_limit"] = credits_limit
-    params["start_time"] = start_time
-    params["end_time"] = end_time
-    params["percentage"] = percentage
-    params["log_times"] = log_times
-    params["days"] = days
-    params["db_name"] = db_name
-    params["table_name"] = table_name
-    params["threshold_unit"] = threshold_unit
-    params["threshold_value"] = threshold_value
-    return resource_name, params
-
 Button = st.button("Save and Monitor", disabled = st.session_state['df'].empty)
 if Button:
     try:
@@ -311,4 +324,47 @@ if Button:
         st.session_state['reset'] = True
         st.write(e)
         st.error("Kindly check whether you've filled all the inputs")
+# else:
+#     saveState = True
+#     monitorName = st.text_input(label="Monitor Name", placeholder="Monitor name")
+#     for default in data['defaults']:
+#         actions = []
+#         for action in default['category']['sub_category']['action']:
+#             actions.append(action['value'])
+#         if default['name'] == defaultMonitorSelector:
+#             monitorType = default['value']
+#             monitorTypeId = ''
+#             categoryName = default['category']['value']
+#             categoryId = ''
+#             subcategoryName = default['category']['sub_category']['value']
+#             subcategoryId = ''
+#             defaultActionSelector = st.selectbox(
+#                     "Actions",
+#                     set(actions),
+#                     index=None,
+#                     placeholder="Select actions",
+#                     key="act" + default['name']
+#                 )
+#             if defaultActionSelector:
+#                 actionName = defaultActionSelector
+#                 actionId = ''
+#                 aEmail = st.text_input("Email id", value=None, key="aemail" + default['name'])
+#                 if aEmail:
+#                     saveState = False
+#     Button = st.button("Save and Monitor", disabled = saveState)
+#     if Button:
+#         try:
+#             if not monitorName in st.session_state['session'].sql("SELECT MONITOR_NAME FROM MONITOR_METADATA").to_pandas()['MONITOR_NAME'].to_list():
+#                 createdBy = st.session_state['session'].sql(f"""SELECT CURRENT_USER() as USER""").to_pandas()['USER'].values[0]
+#                 coreProc(monitorName, monitorType, categoryName, subcategoryName, actionName, aEmail, str({}).replace("'", '"'), createdBy, '0 0,12 * * 0 UTC', aEmail, st.session_state['session'].sql('SELECT CURRENT_TIMESTAMP() AS TIMESTAMP').to_pandas()['TIMESTAMP'].values[0])
+#                 st.session_state['reset'] = True
+#                 st.success('Monitor added Successfully')
+#                 st.switch_page("app_pages/dashboard.py")
+#             else:
+#                 st.error('Monitor Name already exists')
+#         except Exception as e:
+#             st.session_state['reset'] = True
+#             st.error("Kindly check whether you've filled all the inputs")
+
+
     

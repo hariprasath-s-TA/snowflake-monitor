@@ -3,8 +3,6 @@ import plotly.express as px
 import pandas as pd
 
 
-st.markdown("<h2 style='text-align: left;'>Monitoring Rules</h2>", unsafe_allow_html=True)
-
 def active_rule(id, state, task):
     st.session_state['session'].sql(f"""
         update monitor_metadata set is_active = {not state} where id = '{id}'
@@ -64,6 +62,8 @@ def create_metric_card(title, value, icon):
         """,
         unsafe_allow_html=True
     )
+
+st.markdown("<h2 style='text-align: left;'>Monitoring Rules</h2>", unsafe_allow_html=True)
 
 results = st.session_state['session'].sql(f"""SELECT * FROM dashboard_stats_view""").to_pandas()
 
@@ -126,11 +126,11 @@ checked = event.selection.rows
 row = data.iloc[checked]
 
 try:
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col3, col4 = st.columns(3)
     with col1:
         st.toggle('Active', value=row['IS_ACTIVE'].values[0], key=row['ID'].values[0] + ':active', on_change=active_rule, args=(row['ID'].values[0], row['IS_ACTIVE'].values[0], row['TASK_NAME'].values[0], ), disabled=False if checked else True)
-    with col2:
-        st.button('Edit', key=row['ID'].values[0] + ':edit', on_click=edit_rule, args=(row['ID'].values[0], ), disabled=False if checked else True)
+    # with col2:
+    #     st.button('Edit', key=row['ID'].values[0] + ':edit', on_click=edit_rule, args=(row['ID'].values[0], ), disabled=False if checked else True)
     with col3:
         st.button('Delete', key=row['ID'].values[0] + ':delete', on_click=delete_rule, args=(row['ID'].values[0], row['TASK_NAME'].values[0], ), disabled=False if checked else True)
     with col4:
